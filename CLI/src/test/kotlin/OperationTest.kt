@@ -213,4 +213,106 @@ internal class OperationTest {
         assertTrue(result.isInterrupted)
         assertTrue(result.textResult.contains("java.io.IOException: Cannot run program \"ichi\""))
     }
+
+    @Test
+    fun simpleGrepTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\na a a b \nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("a", "kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(listOf("a", "a", "a a a b "), result.textResult.split("\n"))
+    }
+
+    @Test
+    fun regexGrepTest() {
+
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\na a a b \nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("a$", "kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(listOf("a", "a"), result.textResult.split("\n"))
+    }
+
+    @Test
+    fun ignoreCaseKeyGrepTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("b\na\na a a B \nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("-i", "b", "kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(listOf("b", "a a a B "), result.textResult.split("\n"))
+    }
+
+    @Test
+    fun wholeWordKeyGrepTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\nba a a\nb\nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("-w", "b", "kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(listOf("b"), result.textResult.split("\n"))
+    }
+
+    @Test
+    fun keyCombinationGrepParseTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\nba a a B \nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("-iw", "b", "kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(listOf("ba a a B "), result.textResult.split("\n"))
+    }
+
+    @Test
+    fun severalKeysGrepParseTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\nba a a B \nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("-i", "-w", "b", "kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(listOf("ba a a B "), result.textResult.split("\n"))
+    }
+
+    @Test
+    fun pipeInputGrepTest() {
+        val grep = Grep(environment)
+
+        val result = grep.withArgs(listOf("-i", "rer")).run("Rer\nreE")
+        assertEquals(false, result.isInterrupted)
+        assertEquals(listOf("Rer"), result.textResult.split("\n"))
+    }
+
+    @Test
+    fun lineAfterMatchGrepTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\nba a a B \nc\nd\ne")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("-A", "2", "b", "kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(listOf("ba a a B ", "c", "d"), result.textResult.split("\n"))
+    }
+
 }
