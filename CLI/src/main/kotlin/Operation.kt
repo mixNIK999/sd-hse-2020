@@ -1,5 +1,6 @@
 package com.sd.hw
 
+import picocli.CommandLine
 import java.io.File
 import java.lang.Exception
 
@@ -107,7 +108,6 @@ class RunProcess(private  val name: String, environment: Environment) : Operatio
      */
     override fun run(additionalInput: String?): ExecutionResult {
         args.add(0, name)
-//        println(args)
         try {
             val process = ProcessBuilder(args)
                 .directory(File("."))
@@ -153,6 +153,62 @@ class Association(environment: Environment) : Operation(environment) {
 }
 
 /**
+ * Class for grep bash command partial simulation.
+ */
+class Grep(environment: Environment) : Operation(environment) {
+    @CommandLine.Parameters(index = "0..*", arity = "1..2")
+    var parameters: ArrayList<String> = arrayListOf()
+
+    @CommandLine.Option(names = ["-i"], description = ["ignore case distinctions"])
+    var ignoreCase: Boolean = false
+
+    @CommandLine.Option(names = ["-w"], description = ["match only whole words"])
+    var word: Boolean = false
+
+    @CommandLine.Option(names = ["-A"], description = ["number of lines after match to show"])
+    var number: Int = 0
+
+    /**
+     * Returns joined results of pattern matching.
+     */
+    override fun run(additionalInput: String?): ExecutionResult {
+        CommandLine(this).parseArgs(*args.toTypedArray())
+
+        var file: String? = null
+        if (parameters.isEmpty()) {
+            return ExecutionResult(true, "missing regex grep parameter")
+        }
+        var regexText = parameters[0]
+        if (parameters.size == 2) {
+            file = parameters[1]
+        }
+
+
+        val fileText = if (file != null) environment.resolveFile(file) else additionalInput
+        fileText ?: return ExecutionResult(true, "Error parsing grep input")
+
+        val regexOptionsSet = mutableSetOf<RegexOption>()
+        if (ignoreCase) regexOptionsSet.add(RegexOption.IGNORE_CASE)
+        if (word) regexText = "\\b$regexText\\b"
+
+        val regex = Regex(regexText, regexOptionsSet)
+        val lines = fileText.split("\n")
+        val result = mutableListOf<String>()
+        var lastMatched = -number - 1
+        for (i in lines.indices) {
+            if (regex.find(lines[i]) != null) {
+                result.add(lines[i])
+                lastMatched = i
+            } else if (i <= lastMatched + number) {
+                result.add(lines[i])
+            }
+        }
+
+        return ExecutionResult(false, result.joinToString("\n"))
+    }
+}
+
+/**
  * Class for Operation instances creation.
  */
 class OperationFactory(private val environment: Environment) {
@@ -168,6 +224,7 @@ class OperationFactory(private val environment: Environment) {
             "cat" -> Cat(environment)
             "exit" -> Exit(environment)
             "=" -> Association(environment)
+            "grep" -> Grep(environment)
             else -> RunProcess(name, environment)
         }
     }
