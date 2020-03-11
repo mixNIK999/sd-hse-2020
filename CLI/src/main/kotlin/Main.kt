@@ -11,7 +11,7 @@ fun main() {
         if (result.textResult.isNotEmpty()) {
             println(result.textResult)
         }
-        isRunning = !result.isInterrupted
+        isRunning = !result.isEnded
     }
 }
 

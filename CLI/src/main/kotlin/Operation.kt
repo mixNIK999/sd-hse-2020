@@ -93,7 +93,7 @@ class Exit(environment: Environment) : Operation(environment) {
      * Returns interrupting ExecutionResult.
      */
     override fun run(additionalInput: String?): ExecutionResult {
-        return ExecutionResult(true)
+        return ExecutionResult(true, "", true)
     }
 }
 

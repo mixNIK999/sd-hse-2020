@@ -7,7 +7,7 @@ import java.io.File
  * @param isInterrupted does command execution should be stopped after current
  * @param textResult text output of the command
  */
-data class ExecutionResult(val isInterrupted: Boolean, val textResult: String = "")
+data class ExecutionResult(val isInterrupted: Boolean, val textResult: String = "", val isEnded: Boolean = false)
 
 /**
  * Class for environment simulation. Manage variables and files.
