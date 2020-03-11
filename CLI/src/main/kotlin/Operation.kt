@@ -72,11 +72,16 @@ class Cat(environment: Environment) : Operation(environment) {
      * Returns text of file given in the arguments or additional input.
      */
     override fun run(additionalInput: String?): ExecutionResult {
-        val text = if (args.isNotEmpty()) args[0] else additionalInput
-        text ?: return ExecutionResult(true)
-        val result = environment.resolveFile(text)
-            ?: return ExecutionResult(true, "No file named $text found")
-        return ExecutionResult(false, result)
+        if (args.isNotEmpty()) {
+            val filename = args[0]
+            val result = environment.resolveFile(filename)
+                ?: return ExecutionResult(true, "No file named $filename found")
+            return ExecutionResult(false, result)
+        }
+        if (additionalInput != null) {
+            return ExecutionResult(false, additionalInput)
+        }
+        return ExecutionResult(true, "too few arguments for cat")
     }
 }
 

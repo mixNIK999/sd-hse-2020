@@ -127,12 +127,8 @@ internal class OperationTest {
     @Test
     fun catAdditionalInputTest() {
         val cat = Cat(environment)
-        val file = File("kek")
-        file.createNewFile()
-        file.writeText("a\na\na a a b \nc")
-        file.deleteOnExit()
 
-        val result = cat.run("kek")
+        val result = cat.run("a\na\na a a b \nc")
         assertEquals(false, result.isInterrupted)
         assertEquals("a\na\na a a b \nc", result.textResult)
     }
