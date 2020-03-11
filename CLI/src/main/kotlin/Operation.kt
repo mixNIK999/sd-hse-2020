@@ -1,6 +1,7 @@
 package com.sd.hw
 
 import java.io.File
+import java.lang.Exception
 
 /**
  * Parent class for all bash commands.
@@ -100,28 +101,34 @@ class Exit(environment: Environment) : Operation(environment) {
 /**
  * Class for inner process run.
  */
-class RunProcess(environment: Environment) : Operation(environment) {
+class RunProcess(private  val name: String, environment: Environment) : Operation(environment) {
     /**
      * Delegate all given arguments to process builder and translate process output to ExecutionResult.
      */
     override fun run(additionalInput: String?): ExecutionResult {
-        val process = ProcessBuilder(args)
+        args.add(0, name)
+//        println(args)
+        try {
+            val process = ProcessBuilder(args)
                 .directory(File("."))
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
-        val output = process.inputStream
-        val error = process.errorStream
-        process.waitFor()
-        val outputString = output.bufferedReader().readText().trim()
-        val errorString = error.bufferedReader().readText().trim()
+            val output = process.inputStream
+            val error = process.errorStream
+            process.waitFor()
+            val outputString = output.bufferedReader().readText().trim()
+            val errorString = error.bufferedReader().readText().trim()
 
-        process.destroy()
-        return if (errorString.isNotEmpty()) {
-            ExecutionResult(true, errorString)
-        }
-        else {
-            ExecutionResult(false, outputString)
+            process.destroy()
+            return if (errorString.isNotEmpty()) {
+                ExecutionResult(true, errorString)
+            }
+            else {
+                ExecutionResult(false, outputString)
+            }
+        } catch (e: Exception) {
+            return ExecutionResult(true, e.toString())
         }
     }
 }
@@ -160,9 +167,8 @@ class OperationFactory(private val environment: Environment) {
             "pwd" -> Pwd(environment)
             "cat" -> Cat(environment)
             "exit" -> Exit(environment)
-            "!$" -> RunProcess(environment)
             "=" -> Association(environment)
-            else -> null
+            else -> RunProcess(name, environment)
         }
     }
 }

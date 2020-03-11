@@ -34,13 +34,6 @@ internal class EnvironmentTest {
     }
 
     @Test
-    fun unknownCommandExecuteTest() {
-        val result = environment.execute("eke a a a a")
-        assertEquals(true, result.isInterrupted)
-        assertEquals(Environment.PARSING_ERROR_MESSAGE, result.textResult)
-    }
-
-    @Test
     fun exitCommandExecuteTest() {
         val result = environment.execute("exit")
         assertEquals(true, result.isInterrupted)

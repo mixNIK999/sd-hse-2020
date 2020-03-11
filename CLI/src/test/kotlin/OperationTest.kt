@@ -186,23 +186,25 @@ internal class OperationTest {
 
     @Test
     fun runProcessSimpleTest() {
-        val runProcess = RunProcess(environment)
-        val result = runProcess.withArgs(listOf("echo", "1")).run()
+        val runProcess = RunProcess("git", environment)
+        val result = runProcess.withArgs(listOf("symbolic-ref", "--short", "HEAD")).run()
         assertEquals(false, result.isInterrupted)
-        assertEquals("1", result.textResult)
+        assertEquals("hw-1", result.textResult.trim())
     }
 
     @Test
     fun runProcessStderrTest() {
-        val runProcess = RunProcess(environment)
-        val result = runProcess.withArgs(listOf("cat", "1")).run()
+        val runProcess = RunProcess("git", environment)
+        val result = runProcess.withArgs(listOf("sleep20")).run()
         assertEquals(true, result.isInterrupted)
-        assertTrue(result.textResult.contains("No such file or directory"))
+        assertTrue(result.textResult.contains("'sleep20' is not a git command"))
     }
 
     @Test
     fun runProcessUnknownCommandTest() {
-        val runProcess = RunProcess(environment)
-        assertThrows<IOException> { runProcess.withArgs(listOf("icho", "1")).run() }
+        val runProcess = RunProcess("ichi", environment)
+        val result = runProcess.withArgs(listOf("icho", "1")).run()
+        assertTrue(result.isInterrupted)
+        assertTrue(result.textResult.contains("No such file or directory"))
     }
 }

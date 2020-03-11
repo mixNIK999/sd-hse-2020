@@ -25,20 +25,12 @@ class Parser(private val operationFactory: OperationFactory, private val environ
 
     internal fun splitInputBySeparators(input: String): List<String> {
         val matcher: Matcher = Pattern.compile("(([^(\"')]\\S*|\".+?\"|'.+?')\\s*)")
-                    .matcher(replaceBracketsInRunProcess(input))
+                    .matcher(input)
         val list = mutableListOf<String>()
         while (matcher.find()) {
             list.add(matcher.group().trim())
         }
         return list
-    }
-
-    private fun replaceBracketsInRunProcess(input: String): String {
-        val regex = "\\$\\((.*?)\\)".toRegex()
-        return regex.replace(input) {
-            val text = it.value
-            "!$ " + text.drop(2).dropLast(1) + " "
-        }
     }
 
     internal fun resolveQuotesAndVariables(str: String): String {
