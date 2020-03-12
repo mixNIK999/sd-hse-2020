@@ -187,9 +187,13 @@ internal class OperationTest {
     @Test
     fun runProcessSimpleTest() {
         val runProcess = RunProcess("git", environment)
-        val result = runProcess.withArgs(listOf("symbolic-ref", "--short", "HEAD")).run()
+        val result = runProcess.withArgs(listOf("--help")).run()
         assertEquals(false, result.isInterrupted)
-        assertEquals("hw-1", result.textResult.trim())
+        assertTrue(result.textResult.contains("usage: git [--version] [--help] [-C <path>] [-c <name>=<value>]\n" +
+                "           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n" +
+                "           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]\n" +
+                "           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n" +
+                "           <command> [<args>]\n"))
     }
 
     @Test
