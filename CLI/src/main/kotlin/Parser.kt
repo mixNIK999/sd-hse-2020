@@ -79,10 +79,9 @@ class Parser(private val operationFactory: OperationFactory, private val environ
     }
 
     private fun replaceAllVariables(input: String): String {
-        return input.split(" ").joinToString(" ") {
-            if (it.isNotEmpty() && it[0] == '$') environment.resolveVariable(it.drop(1))
-            else it
+        return input.replace("\\$([a-zA-Z0-9_]+)".toRegex()) {
+            val name = it.groupValues[1]
+            environment.resolveVariable(name)
         }
     }
-
 }
