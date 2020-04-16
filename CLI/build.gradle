@@ -12,6 +12,13 @@ repositories {
     mavenCentral()
 }
 
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
 run {
     mainClassName = 'com.sd.hw.Main'
     classpath = sourceSets.main.runtimeClasspath
