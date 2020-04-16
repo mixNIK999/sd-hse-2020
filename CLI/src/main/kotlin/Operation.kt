@@ -172,7 +172,11 @@ class Grep(environment: Environment) : Operation(environment) {
      * Returns joined results of pattern matching.
      */
     override fun run(additionalInput: String?): ExecutionResult {
-        CommandLine(this).parseArgs(*args.toTypedArray())
+        try {
+            CommandLine(this).parseArgs(*args.toTypedArray())
+        } catch (e: CommandLine.ParameterException) {
+            return ExecutionResult(true, "grep: ${e.message}")
+        }
 
         var file: String? = null
         if (parameters.isEmpty()) {

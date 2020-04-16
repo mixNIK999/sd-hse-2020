@@ -229,7 +229,6 @@ internal class OperationTest {
 
     @Test
     fun regexGrepTest() {
-
         val grep = Grep(environment)
         val file = File("kek")
         file.createNewFile()
@@ -265,6 +264,48 @@ internal class OperationTest {
         val result = grep.withArgs(listOf("-w", "b", "kek")).run()
         assertEquals(false, result.isInterrupted)
         assertEquals(listOf("b"), result.textResult.split("\n"))
+    }
+
+    @Test
+    fun invalidKeyGrepTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\nba a a\nb\nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("-t", "b", "kek")).run()
+        assertEquals(true, result.isInterrupted)
+        assertTrue(result.textResult.contains("grep: Unknown option"))
+    }
+
+    @Test
+    fun multipleKeysWithOneInvalidGrepTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\nba a a\nb\nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("-w", "-t", "-i", "b", "kek")).run()
+        assertEquals(true, result.isInterrupted)
+        assertTrue(result.textResult.contains("grep: Unknown option"))
+    }
+
+    @Test
+    fun invalidFilenameGrepTest() {
+        val grep = Grep(environment)
+
+        val result = grep.withArgs(listOf("-w", "b", "unique_filename")).run()
+        assertEquals(true, result.isInterrupted)
+    }
+
+    @Test
+    fun noInputFileGrepTest() {
+        val grep = Grep(environment)
+
+        val result = grep.withArgs(listOf("a")).run()
+        assertEquals(true, result.isInterrupted)
     }
 
     @Test
