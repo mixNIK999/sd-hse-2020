@@ -3,9 +3,7 @@ package com.sd.hw
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.assertThrows
 import java.io.File
-import java.io.IOException
 
 internal class OperationTest {
     private val environment = Environment()
@@ -189,11 +187,15 @@ internal class OperationTest {
         val runProcess = RunProcess("git", environment)
         val result = runProcess.withArgs(listOf("--help")).run()
         assertEquals(false, result.isInterrupted)
-        assertTrue(result.textResult.contains("usage: git [--version] [--help] [-C <path>] [-c <name>=<value>]\n" +
-                "           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n" +
-                "           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]\n" +
-                "           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n" +
-                "           <command> [<args>]\n"))
+        assertTrue(
+            result.textResult.contains(
+                "usage: git [--version] [--help] [-C <path>] [-c <name>=<value>]\n" +
+                        "           [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]\n" +
+                        "           [-p | --paginate | -P | --no-pager] [--no-replace-objects] [--bare]\n" +
+                        "           [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]\n" +
+                        "           <command> [<args>]\n"
+            )
+        )
     }
 
     @Test
@@ -207,8 +209,8 @@ internal class OperationTest {
     @Test
     fun runProcessUnknownCommandTest() {
         val runProcess = RunProcess("ichi", environment)
-        val result = runProcess.withArgs(listOf("icho", "1")).run()
+        val result = runProcess.withArgs(emptyList()).run()
         assertTrue(result.isInterrupted)
-        assertTrue(result.textResult.contains("No such file or directory"))
+        assertTrue(result.textResult.contains("java.io.IOException: Cannot run program \"ichi\""))
     }
 }
