@@ -2,6 +2,8 @@ version: 1.0.{build}
 
 image:
   - Visual Studio 2019
+  - Ubuntu 
 
 build_script:
   - sh: cd CLI && ./gradlew test
+  - cmd: cd CLI && gradlew test
