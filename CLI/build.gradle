@@ -13,7 +13,7 @@ repositories {
 }
 
 run {
-    main = 'com.sd.hw.Main'
+    mainClassName = 'com.sd.hw.Main'
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
 }
