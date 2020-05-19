@@ -187,6 +187,9 @@ class Grep(environment: Environment) : Operation(environment) {
             file = parameters[1]
         }
 
+        if (number < 0) {
+            return ExecutionResult(true, "negative -A key value")
+        }
 
         val fileText = if (file != null) environment.resolveFile(file) else additionalInput
         fileText ?: return ExecutionResult(true, "Error parsing grep input")

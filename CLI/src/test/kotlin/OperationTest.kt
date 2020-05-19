@@ -335,6 +335,18 @@ internal class OperationTest {
     }
 
     @Test
+    fun negativeAKeyValueGrepTest() {
+        val grep = Grep(environment)
+        val file = File("kek")
+        file.createNewFile()
+        file.writeText("a\na\nba a a B \nc")
+        file.deleteOnExit()
+
+        val result = grep.withArgs(listOf("-A", "-100", "kek")).run()
+        assertEquals(true, result.isInterrupted)
+    }
+
+    @Test
     fun pipeInputGrepTest() {
         val grep = Grep(environment)
 
