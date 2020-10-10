@@ -13,7 +13,7 @@ internal class OperationTest {
         val pwd = Pwd(environment)
         val result = pwd.run()
         assertEquals(false, result.isInterrupted)
-        assertEquals(File(".").absolutePath, result.textResult)
+        assertEquals(File(".").canonicalPath, result.textResult)
     }
 
     @Test
@@ -21,7 +21,7 @@ internal class OperationTest {
         val pwd = Pwd(environment)
         val result = pwd.withArgs(listOf("aaa", "bbb", "a")).run()
         assertEquals(false, result.isInterrupted)
-        assertEquals(File(".").absolutePath, result.textResult)
+        assertEquals(File(".").canonicalPath, result.textResult)
     }
 
     @Test
@@ -29,7 +29,7 @@ internal class OperationTest {
         val pwd = Pwd(environment)
         val result = pwd.run("kek")
         assertEquals(false, result.isInterrupted)
-        assertEquals(File(".").absolutePath, result.textResult)
+        assertEquals(File(".").canonicalPath, result.textResult)
     }
 
     @Test
