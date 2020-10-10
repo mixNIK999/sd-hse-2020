@@ -230,4 +230,57 @@ internal class OperationTest {
         assertTrue(result.isInterrupted)
         assertTrue(result.textResult.contains("java.io.IOException: Cannot run program \"ichi\""))
     }
+
+    @Test
+    fun lsCurrentTest() {
+        val ls = LS(environment)
+
+        val result = ls.run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(File(".").listFiles()!!.joinToString("\n") { it.name }, result.textResult)
+    }
+
+    @Test
+    fun lsEmptySubDirTest() {
+        val ls = LS(environment)
+
+        file = File("kek")
+        file.mkdir()
+
+        val result = ls.withArgs(listOf("kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(File("./kek").listFiles()!!.joinToString("\n") { it.name }, result.textResult)
+    }
+
+    @Test
+    fun lsNotExistedSubDirTest() {
+        val ls = LS(environment)
+
+        val result = ls.withArgs(listOf("kek")).run()
+        assertEquals(true, result.isInterrupted)
+        assertEquals("No directory named kek found", result.textResult)
+    }
+
+    @Test
+    fun cdSimpleTest() {
+        val cd = CD(environment)
+
+        file = File("kek")
+        file.mkdir()
+
+        val result = cd.withArgs(listOf("kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals("", result.textResult)
+        assertEquals(file.canonicalPath, environment.workingDirectory.canonicalPath)
+    }
+
+    @Test
+    fun cdNotExistedSubDirTest() {
+        val cd = CD(environment)
+
+        val result = cd.withArgs(listOf("kek")).run()
+        assertEquals(true, result.isInterrupted)
+        assertEquals("No directory named kek found", result.textResult)
+        assertEquals(File(".").canonicalPath, environment.workingDirectory.canonicalPath)
+    }
 }
