@@ -1,12 +1,26 @@
 package com.sd.hw
 
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 
 internal class OperationTest {
-    private val environment = Environment()
+    private lateinit var environment: Environment
+    private var file: File = File("")
+
+    @BeforeEach
+    fun initEnv() {
+        environment = Environment()
+        file = File("")
+    }
+
+    @AfterEach
+    fun deleteFile() {
+        file.delete()
+    }
 
     @Test
     fun pwdSimpleTest() {
@@ -66,9 +80,11 @@ internal class OperationTest {
     @Test
     fun wcFileTest() {
         val wc = WC(environment)
-        val file = File("kek")
+
+        file = File("kek")
         file.createNewFile()
         file.writeText("a a")
+
         val result = wc.withArgs(listOf("kek")).run()
         assertEquals(false, result.isInterrupted)
         assertEquals("1 2 3", result.textResult)
@@ -84,10 +100,11 @@ internal class OperationTest {
     @Test
     fun wcExtraArgsTest() {
         val wc = WC(environment)
-        val file = File("kek")
+
+        file = File("kek")
         file.createNewFile()
         file.writeText("a a")
-        file.deleteOnExit()
+
         val result = wc.withArgs(listOf("kek", "a", "b", "c")).run()
         assertEquals(false, result.isInterrupted)
         assertEquals("1 2 3", result.textResult)
@@ -104,10 +121,10 @@ internal class OperationTest {
     @Test
     fun catExistingFileTest() {
         val cat = Cat(environment)
-        val file = File("kek")
+
+        file = File("kek")
         file.createNewFile()
         file.writeText("a\na\na a a b \nc")
-        file.deleteOnExit()
 
         val result = cat.withArgs(listOf("kek")).run()
         assertEquals(false, result.isInterrupted)
