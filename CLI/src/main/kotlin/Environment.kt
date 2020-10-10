@@ -1,6 +1,7 @@
 package com.sd.hw
 
 import java.io.File
+import java.security.InvalidParameterException
 
 /**
  * Class for storing one command or pipeline execution result.
@@ -20,6 +21,12 @@ class Environment {
 
     private val vars: MutableMap<String, String> = mutableMapOf()
     private val parser = Parser(OperationFactory(this), this)
+    var workingDirectory: File = File(".").absoluteFile
+        set(newDir) {
+            if (!newDir.isDirectory)
+                throw InvalidParameterException("$newDir not a directory")
+            field = newDir
+        }
 
     /**
      * Execute pipeline of bash commands.
@@ -60,7 +67,7 @@ class Environment {
      * Get file text or null if such file does not exist.
      */
     fun resolveFile(filename: String): String? {
-        val file = File(filename)
+        val file = workingDirectory.resolve(filename)
         if (!file.exists()) {
             return null
         }
@@ -68,10 +75,10 @@ class Environment {
     }
 
     /**
-     * Get file absolute path.
+     * Get file canonical path.
      */
     fun getFullFilePath(filename: String): String {
-        val file = File(filename)
-        return file.absolutePath
+        val file = workingDirectory.resolve(filename)
+        return file.canonicalPath
     }
 }

@@ -1,19 +1,33 @@
 package com.sd.hw
 
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 
 internal class OperationTest {
-    private val environment = Environment()
+    private lateinit var environment: Environment
+    private var file: File = File("")
+
+    @BeforeEach
+    fun initEnv() {
+        environment = Environment()
+        file = File("")
+    }
+
+    @AfterEach
+    fun deleteFile() {
+        file.delete()
+    }
 
     @Test
     fun pwdSimpleTest() {
         val pwd = Pwd(environment)
         val result = pwd.run()
         assertEquals(false, result.isInterrupted)
-        assertEquals(File(".").absolutePath, result.textResult)
+        assertEquals(File(".").canonicalPath, result.textResult)
     }
 
     @Test
@@ -21,7 +35,7 @@ internal class OperationTest {
         val pwd = Pwd(environment)
         val result = pwd.withArgs(listOf("aaa", "bbb", "a")).run()
         assertEquals(false, result.isInterrupted)
-        assertEquals(File(".").absolutePath, result.textResult)
+        assertEquals(File(".").canonicalPath, result.textResult)
     }
 
     @Test
@@ -29,7 +43,7 @@ internal class OperationTest {
         val pwd = Pwd(environment)
         val result = pwd.run("kek")
         assertEquals(false, result.isInterrupted)
-        assertEquals(File(".").absolutePath, result.textResult)
+        assertEquals(File(".").canonicalPath, result.textResult)
     }
 
     @Test
@@ -66,9 +80,11 @@ internal class OperationTest {
     @Test
     fun wcFileTest() {
         val wc = WC(environment)
-        val file = File("kek")
+
+        file = File("kek")
         file.createNewFile()
         file.writeText("a a")
+
         val result = wc.withArgs(listOf("kek")).run()
         assertEquals(false, result.isInterrupted)
         assertEquals("1 2 3", result.textResult)
@@ -84,10 +100,11 @@ internal class OperationTest {
     @Test
     fun wcExtraArgsTest() {
         val wc = WC(environment)
-        val file = File("kek")
+
+        file = File("kek")
         file.createNewFile()
         file.writeText("a a")
-        file.deleteOnExit()
+
         val result = wc.withArgs(listOf("kek", "a", "b", "c")).run()
         assertEquals(false, result.isInterrupted)
         assertEquals("1 2 3", result.textResult)
@@ -104,10 +121,10 @@ internal class OperationTest {
     @Test
     fun catExistingFileTest() {
         val cat = Cat(environment)
-        val file = File("kek")
+
+        file = File("kek")
         file.createNewFile()
         file.writeText("a\na\na a a b \nc")
-        file.deleteOnExit()
 
         val result = cat.withArgs(listOf("kek")).run()
         assertEquals(false, result.isInterrupted)
@@ -212,5 +229,58 @@ internal class OperationTest {
         val result = runProcess.withArgs(emptyList()).run()
         assertTrue(result.isInterrupted)
         assertTrue(result.textResult.contains("java.io.IOException: Cannot run program \"ichi\""))
+    }
+
+    @Test
+    fun lsCurrentTest() {
+        val ls = LS(environment)
+
+        val result = ls.run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(File(".").listFiles()!!.joinToString("\n") { it.name }, result.textResult)
+    }
+
+    @Test
+    fun lsEmptySubDirTest() {
+        val ls = LS(environment)
+
+        file = File("kek")
+        file.mkdir()
+
+        val result = ls.withArgs(listOf("kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals(File("./kek").listFiles()!!.joinToString("\n") { it.name }, result.textResult)
+    }
+
+    @Test
+    fun lsNotExistedSubDirTest() {
+        val ls = LS(environment)
+
+        val result = ls.withArgs(listOf("kek")).run()
+        assertEquals(true, result.isInterrupted)
+        assertEquals("No directory named kek found", result.textResult)
+    }
+
+    @Test
+    fun cdSimpleTest() {
+        val cd = CD(environment)
+
+        file = File("kek")
+        file.mkdir()
+
+        val result = cd.withArgs(listOf("kek")).run()
+        assertEquals(false, result.isInterrupted)
+        assertEquals("", result.textResult)
+        assertEquals(file.canonicalPath, environment.workingDirectory.canonicalPath)
+    }
+
+    @Test
+    fun cdNotExistedSubDirTest() {
+        val cd = CD(environment)
+
+        val result = cd.withArgs(listOf("kek")).run()
+        assertEquals(true, result.isInterrupted)
+        assertEquals("No directory named kek found", result.textResult)
+        assertEquals(File(".").canonicalPath, environment.workingDirectory.canonicalPath)
     }
 }

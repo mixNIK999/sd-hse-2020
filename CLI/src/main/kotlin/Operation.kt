@@ -87,6 +87,46 @@ class Cat(environment: Environment) : Operation(environment) {
 }
 
 /**
+ * Class for cd bash command partial simulation.
+ */
+class CD(environment: Environment) : Operation(environment) {
+    /**
+     * Change working directory.
+     */
+    override fun run(additionalInput: String?): ExecutionResult {
+        if (args.isNotEmpty()) {
+            val filename = args[0]
+            val newPath = environment.workingDirectory.resolve(filename)
+            if (!newPath.exists() || !newPath.isDirectory) {
+                return ExecutionResult(true, "No directory named $filename found")
+            }
+            environment.workingDirectory = environment.workingDirectory.resolve(filename)
+        }
+        return ExecutionResult(false, "")
+    }
+}
+
+/**
+ * Class for ls bash command partial simulation.
+ */
+class LS(environment: Environment) : Operation(environment) {
+    /**
+     * Returns list of files in the given directory (the current is default).
+     */
+    override fun run(additionalInput: String?): ExecutionResult {
+        val path = if (args.isNotEmpty()) args[0] else "."
+
+        val pathToTarget = environment.workingDirectory.resolve(path)
+        if (!pathToTarget.exists() || !pathToTarget.isDirectory) {
+            return ExecutionResult(true, "No directory named $path found")
+        }
+        val filesList = pathToTarget.listFiles() ?: return ExecutionResult(true, "Can not read from $path")
+        val result = filesList.joinToString("\n") { it.name }
+        return ExecutionResult(false, result)
+    }
+}
+
+/**
  * Class for exit bash command partial simulation.
  */
 class Exit(environment: Environment) : Operation(environment) {
@@ -110,7 +150,7 @@ class RunProcess(private  val name: String, environment: Environment) : Operatio
 //        println(args)
         try {
             val process = ProcessBuilder(args)
-                .directory(File("."))
+                .directory(environment.workingDirectory)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
@@ -168,6 +208,8 @@ class OperationFactory(private val environment: Environment) {
             "cat" -> Cat(environment)
             "exit" -> Exit(environment)
             "=" -> Association(environment)
+            "cd" -> CD(environment)
+            "ls" -> LS(environment)
             else -> RunProcess(name, environment)
         }
     }
