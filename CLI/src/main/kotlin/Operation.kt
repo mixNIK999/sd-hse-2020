@@ -150,7 +150,7 @@ class RunProcess(private  val name: String, environment: Environment) : Operatio
 //        println(args)
         try {
             val process = ProcessBuilder(args)
-                .directory(File("."))
+                .directory(environment.workingDirectory)
                 .redirectOutput(ProcessBuilder.Redirect.PIPE)
                 .redirectError(ProcessBuilder.Redirect.PIPE)
                 .start()
